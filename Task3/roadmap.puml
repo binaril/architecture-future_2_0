@@ -1,0 +1,62 @@
+@startgantt
+skinparam defaultTextAlignment left
+printscale monthly zoom 2
+
+Project starts 2026-06-01
+
+
+[Фаза 1: Аудит и проектирование архитектуры] as [P1] lasts 60 days and is colored in #AED6F1
+
+[Аудит SQL Server 2008 и оценка рисков безопасности] starts 2026-06-01 and lasts 20 days and is colored in #5DADE2
+[Проектирование целевой облачной архитектуры] starts 2026-06-15 and lasts 35 days and is colored in #5DADE2
+[Определение и согласование доменных границ] starts 2026-06-15 and lasts 30 days and is colored in #5DADE2
+[Выбор облачного провайдера и технологического стека] starts 2026-06-20 and lasts 20 days and is colored in #5DADE2
+
+[M1: Архитектура и домены согласованы] happens 2026-07-31
+
+
+[Фаза 2: Фундамент платформы данных] as [P2] starts 2026-08-01 and lasts 120 days and is colored in #A9DFBF
+
+[Развёртывание Cloud-инфраструктуры] starts 2026-08-01 and lasts 30 days and is colored in #27AE60
+[Настройка Apache Kafka и API Gateway] starts 2026-08-01 and lasts 40 days and is colored in #27AE60
+[Изоляция медицинских данных — выполнение требований 152-ФЗ] starts 2026-08-15 and lasts 45 days and is colored in #E74C3C
+[Создание Data Lake на базе S3] starts 2026-09-01 and lasts 30 days and is colored in #27AE60
+[Развёртывание Apache Airflow, первые ETL-пайплайны] starts 2026-09-15 and lasts 50 days and is colored in #27AE60
+[Миграция аналитического DWH на ClickHouse] starts 2026-10-01 and lasts 50 days and is colored in #27AE60
+
+[M2: Медицинские данные физически изолированы] happens 2026-10-01
+[M3: Аналитический DWH мигрирован в облако] happens 2026-11-30
+
+
+[Фаза 3: Портал самообслуживания] as [P3] starts 2026-12-01 and lasts 90 days and is colored in #FEF9E7
+
+[Развёртывание Apache Superset, настройка ролевого доступа] starts 2026-12-01 and lasts 35 days and is colored in #F4D03F
+[ETL-пайплайны для всех доменов в DWH] starts 2026-12-01 and lasts 60 days and is colored in #F4D03F
+[Запуск DataHub — каталог данных и lineage] starts 2026-12-15 and lasts 45 days and is colored in #F4D03F
+[Онбординг первых бизнес-пользователей и обучение] starts 2027-01-15 and lasts 45 days and is colored in #F4D03F
+
+[M4: Портал самообслуживания запущен для бизнеса] happens 2027-03-01
+
+
+[Фаза 4: Независимость доменов] as [P4] starts 2027-03-01 and lasts 120 days and is colored in #E8DAEF
+
+[Запуск нового МИС — замена PowerBuilder] starts 2027-03-01 and lasts 90 days and is colored in #8E44AD
+[Изоляция финтех-домена, перенос бизнес-логики из DWH] starts 2027-03-01 and lasts 60 days and is colored in #8E44AD
+[Запуск AI Platform и реестра ML-моделей MLflow] starts 2027-03-15 and lasts 60 days and is colored in #8E44AD
+[Замена Apache Camel ESB на Kafka] starts 2027-04-01 and lasts 60 days and is colored in #E74C3C
+[Вывод из эксплуатации SQL Server 2008] starts 2027-05-01 and lasts 30 days and is colored in #E74C3C
+
+[M5: SQL Server 2008 выведен] happens 2027-06-01
+[M6: Все домены работают независимо] happens 2027-07-01
+
+
+[Фаза 5: Масштабирование на новых партнёров] as [P5] starts 2027-07-01 and lasts 90 days and is colored in #D6EAF8
+
+[Интеграция фармацевтических партнёров через Kafka] starts 2027-07-01 and lasts 45 days and is colored in #2E86C1
+[Интеграция производителя медицинского оборудования] starts 2027-07-15 and lasts 45 days and is colored in #2E86C1
+[Внедрение принципов Data Mesh в доменах] starts 2027-07-01 and lasts 60 days and is colored in #2E86C1
+[Полный вывод PowerBuilder из эксплуатации] starts 2027-07-01 and lasts 30 days and is colored in #E74C3C
+
+[M7: Целевая архитектура полностью реализована] happens 2027-09-30
+
+@endgantt
