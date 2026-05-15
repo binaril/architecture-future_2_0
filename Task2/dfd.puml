@@ -1,0 +1,70 @@
+@startuml DFD_Future20_Domains
+skinparam defaultTextAlignment center
+skinparam ranksep 60
+skinparam nodesep 40
+
+skinparam rectangle {
+    BackgroundColor #FFF9C4
+    BorderColor #E65100
+    FontSize 12
+    FontStyle bold
+}
+skinparam rectangle<<ext>> {
+    BackgroundColor #EDE7F6
+    BorderColor #4527A0
+    FontStyle plain
+}
+skinparam database {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    FontSize 11
+}
+
+rectangle "Врач / Оператор\nклиники" <<ext>> as ee_doc
+rectangle "Клиент\nфинтех-услуг" <<ext>> as ee_client
+rectangle "Бизнес-аналитик /\nМенеджер" <<ext>> as ee_analyst
+rectangle "Фармацевтический\nпартнёр" <<ext>> as ee_pharma
+rectangle "Производитель\nмедоборудования" <<ext>> as ee_equip
+
+rectangle "P1\nДомен: Клиники\n(МИС)" as p_clinic
+rectangle "P2\nДомен: ИИ-Сервисы\n(AI Platform)" as p_ai
+rectangle "P3\nДомен: Финтех\n(Banking API)" as p_fintech
+rectangle "P4\nПлатформа данных\n(ETL / Airflow)" as p_data
+rectangle "P5\nПортал\nсамообслуживания" as p_portal
+
+database "DS1: Медицинские данные\n⚠ изолировано, не в витрине" as ds_med
+database "DS2: Реестр ML-моделей\n(MLflow + S3)" as ds_ml
+database "DS3: Финтех БД\n(PostgreSQL)" as ds_fin
+database "DS4: Data Lake\n(сырые события)" as ds_lake
+database "DS5: Аналитический DWH\n(обезличенные данные)" as ds_dwh
+
+ee_doc       --> p_clinic : данные визита,\nанамнез, назначения
+p_clinic     --> ee_doc   : медкарта,\nистория лечения
+p_clinic     --> ds_med   : запись медданных
+ds_med       --> p_clinic : чтение медкарт\nи расписания
+p_clinic     --> p_ai     : запрос ИИ-диагностики\n(обезличенные данные)
+p_ai         --> p_clinic : результат диагностики,\nоценка риска
+
+ds_med   --> p_ai   : анонимизированные данные\nдля обучения моделей\n(read-only, изолированный доступ)
+ee_equip --> p_ai   : телеметрия\nмедоборудования
+p_ai     --> ds_ml  : сохранение обученных моделей
+ds_ml    --> p_ai   : загрузка модели\nдля инференса
+
+ee_client    --> p_fintech : заявка на кредит,\nплатёж, открытие счёта
+p_fintech    --> ee_client : выписка,\nстатус кредита
+p_fintech    --> ds_fin    : запись финансовых операций
+ds_fin       --> p_fintech : чтение финансовых данных
+
+p_clinic     --> p_data : агрегированные мед.\nсобытия (без ПДн)
+p_fintech    --> p_data : финансовые события\n(транзакции, кредиты)
+ee_pharma    --> p_data : каталог препаратов,\nценовые данные
+ee_equip     --> p_data : данные\nдиагностических устройств
+p_data       --> ds_lake : сырые события\nвсех доменов
+ds_lake      --> p_data  : чтение для\nтрансформации
+p_data       --> ds_dwh  : трансформированные,\nобезличенные данные
+
+ds_dwh       --> p_portal : аналитические данные
+ee_analyst   --> p_portal : запрос отчёта / среза\nпо ролевому доступу
+p_portal     --> ee_analyst : отчёт, дашборд,\nконструктор витрин
+
+@enduml
