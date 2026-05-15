@@ -1,0 +1,70 @@
+@startuml Future20_TargetArchitecture_C4
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+
+title Целевая архитектура «Будущее 2.0» — C4 Container Diagram (год вперёд)
+
+Person(p_analyst,   "Бизнес-аналитик / Менеджер", "Строит отчёты и дашборды\nв режиме самообслуживания")
+Person(p_operator,  "Оператор клиники",            "Работает с медкартами\nи расписанием через web-интерфейс")
+Person(p_doctor,    "Врач",                        "Просматривает данные пациента\nи запрашивает ИИ-диагностику")
+Person(p_client,    "Клиент финтех-услуг",         "Пользуется кредитами,\nсчетами и платёжными сервисами")
+
+System_Ext(ext_pharma,   "Фармацевтические партнёры",     "Передают данные о препаратах\nчерез стандартизированный API")
+System_Ext(ext_medequip, "Производитель медоборудования", "Телеметрия устройств,\nрезультаты диагностики")
+
+System_Boundary(b_clinic, "Домен: Клиники") {
+    Container(c_mis,    "МИС — Медицинская ИС",  "React / Java 21",      "Web-интерфейс для врачей и операторов.\nЗамена устаревшего PowerBuilder")
+    ContainerDb(c_ehrdb, "Хранилище медданных",  "PostgreSQL 16",        "Медкарты, истории болезней,\nрезультаты исследований.\n⚠ ИЗОЛИРОВАНО — не попадает в витрину")
+}
+
+System_Boundary(b_ai, "Домен: ИИ-Сервисы") {
+    Container(c_ai,     "AI-Платформа",          "Python / FastAPI",     "Диагностика, предиктивная аналитика.\nРаботает только с анонимизированными\nи агрегированными мед. данными")
+    ContainerDb(c_mlstore, "Реестр моделей",     "MLflow + S3",          "Версионирование ML-моделей,\nметрики обучения")
+}
+
+System_Boundary(b_fintech, "Домен: Финтех") {
+    Container(c_ftapi,  "Финтех API",            "Golang / Java 21",     "Core-banking: кредиты, счета, платежи.\nБанковская лицензия. Собственная бизнес-логика")
+    ContainerDb(c_ftdb,  "Финтех БД",            "PostgreSQL 16",        "Счета, кредиты, транзакции,\nфинансовые истории клиентов")
+}
+
+System_Boundary(b_integration, "Интеграционный слой") {
+    Container(c_kafka,  "Шина событий",          "Apache Kafka 3.x",     "Event-driven интеграция доменов.\nЗамена монолитного Apache Camel ESB")
+    Container(c_apigw,  "API Gateway",           "Kong / APISIX",        "Единая точка входа: аутентификация,\nrate-limiting, маршрутизация")
+}
+
+System_Boundary(b_data, "Платформа данных") {
+    ContainerDb(c_lake, "Data Lake",             "S3-совместимое хранилище", "Сырые события всех доменов.\nДолгосрочное хранение в партиционированном виде")
+    Container(c_etl,    "ETL/ELT Оркестратор",  "Apache Airflow 2.x",   "DAG-пайплайны трансформации.\nАнонимизация и агрегация медданных\nперед загрузкой в DWH")
+    ContainerDb(c_dwh,  "Аналитический DWH",    "ClickHouse / Redshift", "Агрегированные обезличенные данные\nдля аналитики. Замена SQL Server 2008")
+    Container(c_catalog,"Каталог данных",        "Apache Atlas / DataHub","Метаданные, lineage, владельцы датасетов.\nОснова для доверия к витрине")
+    Container(c_portal, "Портал самообслуживания","Apache Superset",     "Конструктор отчётов, дашборды.\nРолевой доступ. Без медкарт и историй болезней")
+}
+
+Rel(p_analyst,  c_portal, "Строит отчёты и дашборды",   "HTTPS")
+Rel(p_operator, c_mis,    "Регистрирует визиты и данные","HTTPS")
+Rel(p_doctor,   c_mis,    "Просматривает карту пациента","HTTPS")
+Rel(p_doctor,   c_ai,     "Запрашивает ИИ-диагностику",  "HTTPS/gRPC")
+Rel(p_client,   c_apigw,  "Использует финтех-сервисы",   "HTTPS/mTLS")
+
+Rel(c_apigw,  c_ftapi,  "Маршрутизирует запросы",          "gRPC / REST")
+Rel(c_mis,    c_ehrdb,  "CRUD медицинских данных",          "JDBC / внутренняя сеть")
+Rel(c_mis,    c_kafka,  "Публикует доменные события",       "Kafka Producer")
+Rel(c_ftapi,  c_ftdb,   "CRUD финансовых данных",           "JDBC / внутренняя сеть")
+Rel(c_ftapi,  c_kafka,  "Публикует доменные события",       "Kafka Producer")
+
+Rel(c_ai,     c_ehrdb,   "Читает только анонимизир. данные","Изолированный read-only доступ")
+Rel(c_ai,     c_mlstore, "Сохраняет / загружает модели",    "HTTP API")
+
+Rel(c_kafka,  c_lake,   "Стримит сырые события",            "Kafka Connect / S3 Sink")
+Rel(c_etl,    c_lake,   "Читает сырые данные",              "S3 API")
+Rel(c_etl,    c_ehrdb,  "Читает только агрегаты медданных", "JDBC read-only, анонимизация в ETL")
+Rel(c_etl,    c_dwh,    "Загружает трансформированные данные","JDBC / bulk load")
+Rel(c_dwh,    c_portal, "Предоставляет данные для отчётов", "SQL / JDBC")
+Rel(c_catalog,c_dwh,    "Индексирует схемы и метаданные",   "API")
+Rel(c_catalog,c_portal, "Передаёт описания и lineage",      "REST API")
+
+Rel(ext_pharma,   c_apigw, "Передаёт данные о препаратах", "HTTPS / OAuth2")
+Rel(ext_medequip, c_kafka, "Стримит телеметрию оборудования","MQTT / Kafka")
+
+@enduml
