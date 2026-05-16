@@ -1,0 +1,44 @@
+$ tofu apply -auto-approve
+
+docker_volume.db_data: Refreshing state... [id=future20-dev-db-data]
+docker_network.main: Refreshing state... [id=11cfb1ba846e...]
+docker_image.superset: Refreshing state... [id=sha256:f787d226...nginx:alpine]
+docker_image.postgres: Refreshing state... [id=sha256:fff3594b...postgres:16-alpine]
+
+OpenTofu will perform the following actions:
+
+  # docker_container.analytics_db will be created
+  + resource "docker_container" "analytics_db" {
+      + name    = "future20-dev-analytics-db"
+      + image   = "sha256:fff3594b..."
+      + restart = "unless-stopped"
+      + ports { external = 5434, internal = 5432 }
+      + mounts { source = "future20-dev-db-data", target = "/var/lib/postgresql/data" }
+      + networks_advanced { name = "future20-dev-network" }
+    }
+
+  # docker_container.portal will be created
+  + resource "docker_container" "portal" {
+      + name    = "future20-dev-portal"
+      + image   = "sha256:f787d226...nginx:alpine"
+      + restart = "unless-stopped"
+      + ports { external = 8088, internal = 80 }
+      + networks_advanced { name = "future20-dev-network" }
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+docker_container.analytics_db: Creating...
+docker_container.analytics_db: Creation complete after 0s [id=f3e2399f...]
+docker_container.portal: Creating...
+docker_container.portal: Creation complete after 1s [id=15f015ad...]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+db_container_name     = "future20-dev-analytics-db"
+db_host               = "postgresql://future20@localhost:5434/analytics"
+network_name          = "future20-dev-network"
+portal_container_name = "future20-dev-portal"
+portal_url            = "http://localhost:8088"

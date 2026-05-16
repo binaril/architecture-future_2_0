@@ -1,0 +1,83 @@
+@startuml Future20_InfrastructureDiagram
+
+skinparam rectangle<<terraform>> {
+    BackgroundColor #C8E6C9
+    BorderColor #2E7D32
+    FontColor #1B5E20
+}
+skinparam rectangle<<manual>> {
+    BackgroundColor #FFF9C4
+    BorderColor #F57F17
+    FontColor #E65100
+}
+skinparam rectangle<<hold>> {
+    BackgroundColor #FFCDD2
+    BorderColor #C62828
+    FontColor #B71C1C
+}
+skinparam rectangle<<network>> {
+    BackgroundColor #E3F2FD
+    BorderColor #1565C0
+    FontColor #0D47A1
+}
+skinparam rectangle<<host>> {
+    BackgroundColor #F5F5F5
+    BorderColor #607D8B
+}
+
+title Диаграмма автоматизации развёртывания «Будущее 2.0»\nЗелёный = Terraform | Жёлтый = Вручную | Красный = Выводится
+
+legend right
+  |= Цвет |= Тип управления |
+  |<#C8E6C9> Зелёный | Terraform (IaC) |
+  |<#FFF9C4> Жёлтый  | Вручную / Post-deploy |
+  |<#FFCDD2> Красный | Выводится из эксплуатации |
+endlegend
+
+rectangle "Локальный хост (Docker Engine)" <<host>> {
+
+    rectangle "docker_network.main\nfuture20-dev-network\n[docker_network, driver=bridge]" <<network>> {
+
+        rectangle "analytics_db\npostgres:16-alpine\nport 5434:5432\nrestart=unless-stopped\n[docker_container]" <<terraform>> as db
+
+        rectangle "portal\nnginx:alpine\nport 8088:80\nrestart=unless-stopped\n[docker_container]" <<terraform>> as portal
+
+    }
+
+    rectangle "db_data volume\nfuture20-dev-db-data\n[docker_volume, driver=local]" <<terraform>> as vol
+
+    rectangle "Docker Engine\n(установка и запуск)" <<manual>> as docker_daemon
+
+    rectangle "Инициализация схемы БД\n(DDL-миграции вне Terraform)" <<manual>> as schema
+
+    rectangle "Первичная загрузка\nисторических данных" <<manual>> as seed
+
+    rectangle "Конфигурация Nginx/Superset\n(nginx.conf, дашборды)" <<manual>> as config
+
+    rectangle "SQL Server 2008\n(on-premise)" <<hold>> as old_dwh
+    rectangle "Apache Camel ESB\n(on-premise)" <<hold>> as old_esb
+}
+
+docker_daemon --> db      : "запускает контейнеры"
+docker_daemon --> portal  : "запускает контейнеры"
+vol           --> db      : "/var/lib/postgresql/data\n(mount)"
+portal        --> db      : "depends_on\n(порядок старта)"
+schema        --> db      : "DDL после apply"
+seed          --> db      : "Одноразовая миграция\nданных из DWH"
+config        --> portal  : "nginx.conf /\nSuperset dashboards"
+old_dwh       --> seed    : "Источник данных"
+old_esb       --> old_dwh : "Выводится вместе\nс DWH"
+
+note right of db
+  Outputs:
+  db_host = postgresql://future20@localhost:5434/analytics
+  db_container_name = future20-dev-analytics-db
+end note
+
+note right of portal
+  Outputs:
+  portal_url = http://localhost:8088
+  portal_container_name = future20-dev-portal
+end note
+
+@enduml
