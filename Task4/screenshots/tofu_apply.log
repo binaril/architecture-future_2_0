@@ -1,0 +1,189 @@
+> ./tofu_bin/tofu.exe apply
+docker_volume.db_data: Refreshing state... [id=future20-dev-db-data]
+docker_image.superset: Refreshing state... [id=sha256:f787d2269bb599297ef6e2fc50d690813821fa348870b62abfc6fa99112ad7d2nginx:alpine]
+docker_network.main: Refreshing state... [id=11cfb1ba846e70cc38aeb03998bb89240189f1b38fb6093488b8aae9ebdee725]
+docker_image.postgres: Refreshing state... [id=sha256:fff3594bf464bea0f502788874403882d8bbbe618b3250f8649e7e42fd118020postgres:16-alpine]
+docker_container.analytics_db: Refreshing state... [id=c3ad47207500d5a62f461250a76e898ae2022fb51be04cc539f294073ec233de]
+docker_container.portal: Refreshing state... [id=236e7ed8d8bac4e8e32b50ae58443988e74f741881ecc24170d90a0ec7898651]
+
+Note: Objects have changed outside of OpenTofu
+
+OpenTofu detected the following changes made outside of OpenTofu since the last "tofu apply" which may have affected this plan:
+
+  # docker_volume.db_data has been deleted
+  - resource "docker_volume" "db_data" {
+        id         = "future20-dev-db-data"
+      - name       = "future20-dev-db-data" -> null
+        # (2 unchanged attributes hidden)
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the relevant attributes using ignore_changes, the following plan may include actions to undo or respond to these changes.
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+OpenTofu used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+OpenTofu will perform the following actions:
+
+  # docker_container.analytics_db will be created
+  + resource "docker_container" "analytics_db" {
+      + attach                                      = false
+      + bridge                                      = (known after apply)
+      + command                                     = (known after apply)
+      + container_logs                              = (known after apply)
+      + container_read_refresh_timeout_milliseconds = 15000
+      + entrypoint                                  = (known after apply)
+      + env                                         = (sensitive value)
+      + exit_code                                   = (known after apply)
+      + hostname                                    = (known after apply)
+      + id                                          = (known after apply)
+      + image                                       = "sha256:fff3594bf464bea0f502788874403882d8bbbe618b3250f8649e7e42fd118020"
+      + init                                        = (known after apply)
+      + ipc_mode                                    = (known after apply)
+      + log_driver                                  = (known after apply)
+      + logs                                        = false
+      + memory_reservation                          = 0
+      + must_run                                    = true
+      + name                                        = "future20-dev-analytics-db"
+      + network_data                                = (known after apply)
+      + network_mode                                = "bridge"
+      + read_only                                   = false
+      + remove_volumes                              = true
+      + restart                                     = "unless-stopped"
+      + rm                                          = false
+      + runtime                                     = (known after apply)
+      + security_opts                               = (known after apply)
+      + shm_size                                    = (known after apply)
+      + start                                       = true
+      + stdin_open                                  = false
+      + stop_signal                                 = (known after apply)
+      + stop_timeout                                = (known after apply)
+      + tty                                         = false
+      + wait                                        = false
+      + wait_timeout                                = 60
+
+      + healthcheck (known after apply)
+
+      + labels {
+          + label = "project"
+          + value = "future20"
+        }
+      + labels {
+          + label = "service"
+          + value = "analytics-db"
+        }
+
+      + mounts {
+          + source = "future20-dev-db-data"
+          + target = "/var/lib/postgresql/data"
+          + type   = "volume"
+        }
+
+      + networks_advanced {
+          + aliases = []
+          + name    = "future20-dev-network"
+        }
+
+      + ports {
+          + external = 5434
+          + internal = 5432
+          + ip       = "0.0.0.0"
+          + protocol = "tcp"
+        }
+    }
+
+  # docker_container.portal will be created
+  + resource "docker_container" "portal" {
+      + attach                                      = false
+      + bridge                                      = (known after apply)
+      + command                                     = (known after apply)
+      + container_logs                              = (known after apply)
+      + container_read_refresh_timeout_milliseconds = 15000
+      + entrypoint                                  = (known after apply)
+      + env                                         = (known after apply)
+      + exit_code                                   = (known after apply)
+      + hostname                                    = (known after apply)
+      + id                                          = (known after apply)
+      + image                                       = "sha256:f787d2269bb599297ef6e2fc50d690813821fa348870b62abfc6fa99112ad7d2"
+      + init                                        = (known after apply)
+      + ipc_mode                                    = (known after apply)
+      + log_driver                                  = (known after apply)
+      + logs                                        = false
+      + memory_reservation                          = 0
+      + must_run                                    = true
+      + name                                        = "future20-dev-portal"
+      + network_data                                = (known after apply)
+      + network_mode                                = "bridge"
+      + read_only                                   = false
+      + remove_volumes                              = true
+      + restart                                     = "unless-stopped"
+      + rm                                          = false
+      + runtime                                     = (known after apply)
+      + security_opts                               = (known after apply)
+      + shm_size                                    = (known after apply)
+      + start                                       = true
+      + stdin_open                                  = false
+      + stop_signal                                 = (known after apply)
+      + stop_timeout                                = (known after apply)
+      + tty                                         = false
+      + wait                                        = false
+      + wait_timeout                                = 60
+
+      + healthcheck (known after apply)
+
+      + labels {
+          + label = "project"
+          + value = "future20"
+        }
+      + labels {
+          + label = "service"
+          + value = "portal"
+        }
+
+      + networks_advanced {
+          + aliases = []
+          + name    = "future20-dev-network"
+        }
+
+      + ports {
+          + external = 8088
+          + internal = 80
+          + ip       = "0.0.0.0"
+          + protocol = "tcp"
+        }
+    }
+
+  # docker_volume.db_data will be created
+  + resource "docker_volume" "db_data" {
+      + driver     = (known after apply)
+      + id         = (known after apply)
+      + mountpoint = (known after apply)
+      + name       = "future20-dev-db-data"
+    }
+
+Plan: 3 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  OpenTofu will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+docker_volume.db_data: Creating...
+docker_volume.db_data: Creation complete after 0s [id=future20-dev-db-data]
+docker_container.analytics_db: Creating...
+docker_container.analytics_db: Creation complete after 1s [id=61a18f38564835c6cfdc6eb5c65c0a8b407ad004978b7618e8aed378aa7bb9aa]
+docker_container.portal: Creating...
+docker_container.portal: Creation complete after 0s [id=4007aedadf3dedd3348a8b5f4d3598e23dffc944278ca21cd7fa8827712fc095]
+
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.                                                                                                                                                                                                                                                                                                     
+                                                                                                                                                                                                                                                                                                                                                                
+Outputs:                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                
+db_container_name = "future20-dev-analytics-db"                                                                                                                                                                                                                                                                                                                 
+db_host = "postgresql://future20@localhost:5434/analytics"
+network_name = "future20-dev-network"
+portal_container_name = "future20-dev-portal"
+portal_url = "http://localhost:8088"
